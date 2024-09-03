@@ -114,19 +114,59 @@
       }
     },
     openLightBox(element, lightboxId) {
-      $(`#${lightboxId}`)
-        .find(".lightboxImage")
-        .attr("src", element.attr("src"));
-      $(`#${lightboxId}`).modal("toggle");
-    },
-    prevImage() {
-      let activeImage = null;
-      $("img.gallery-item").each(function() {
-        if ($(this).attr("src") === $(".lightboxImage").attr("src")) {
-          activeImage = $(this);
+      const lightboxEl = document.getElementById(lightboxId);
+      if (lightboxEl) {
+        const lightboxImage = lightboxEl.querySelector('.lightboxImage');
+        if (lightboxImage) {
+          lightboxImage.src = element.attr('src');
+          // Store the current image element for navigation
+          lightboxEl.currentImage = element;
         }
-      });
+        const modal = new bootstrap.Modal(lightboxEl);
+        modal.show();
+        
+        // Center the modal
+        lightboxEl.style.display = 'flex';
+        lightboxEl.style.alignItems = 'center';
+        lightboxEl.style.justifyContent = 'center';
+      } else {
+        console.error(`Lightbox with id ${lightboxId} not found`);
+      }
+    },
+
+    prevImage(lightboxId) {
+      const lightboxEl = document.getElementById(lightboxId);
+      const lightboxImage = lightboxEl.querySelector('.lightboxImage');
+      const currentImage = lightboxEl.currentImage;
+      
       let activeTag = $(".tags-bar span.active-tag").data("images-toggle");
+      let imagesCollection = this.getImagesCollection(activeTag);
+      
+      let currentIndex = imagesCollection.findIndex(img => img.attr('src') === currentImage.attr('src'));
+      let prevIndex = (currentIndex - 1 + imagesCollection.length) % imagesCollection.length;
+      
+      let prevImage = imagesCollection[prevIndex];
+      lightboxImage.src = prevImage.attr('src');
+      lightboxEl.currentImage = prevImage;
+    },
+
+    nextImage(lightboxId) {
+      const lightboxEl = document.getElementById(lightboxId);
+      const lightboxImage = lightboxEl.querySelector('.lightboxImage');
+      const currentImage = lightboxEl.currentImage;
+      
+      let activeTag = $(".tags-bar span.active-tag").data("images-toggle");
+      let imagesCollection = this.getImagesCollection(activeTag);
+      
+      let currentIndex = imagesCollection.findIndex(img => img.attr('src') === currentImage.attr('src'));
+      let nextIndex = (currentIndex + 1) % imagesCollection.length;
+      
+      let nextImage = imagesCollection[nextIndex];
+      lightboxImage.src = nextImage.attr('src');
+      lightboxEl.currentImage = nextImage;
+    },
+
+    getImagesCollection(activeTag) {
       let imagesCollection = [];
       if (activeTag === "all") {
         $(".item-column").each(function() {
@@ -136,70 +176,18 @@
         });
       } else {
         $(".item-column").each(function() {
-          if (
-            $(this)
-              .children("img")
-              .data("gallery-tag") === activeTag
-          ) {
+          if ($(this).children("img").data("gallery-tag") === activeTag) {
             imagesCollection.push($(this).children("img"));
           }
         });
       }
-      let index = 0,
-        next = null;
-
-      $(imagesCollection).each(function(i) {
-        if ($(activeImage).attr("src") === $(this).attr("src")) {
-          index = i ;
-        }
-      });
-      next =
-        imagesCollection[index] ||
-        imagesCollection[imagesCollection.length - 1];
-      $(".lightboxImage").attr("src", $(next).attr("src"));
-    },
-    nextImage() {
-      let activeImage = null;
-      $("img.gallery-item").each(function() {
-        if ($(this).attr("src") === $(".lightboxImage").attr("src")) {
-          activeImage = $(this);
-        }
-      });
-      let activeTag = $(".tags-bar span.active-tag").data("images-toggle");
-      let imagesCollection = [];
-      if (activeTag === "all") {
-        $(".item-column").each(function() {
-          if ($(this).children("img").length) {
-            imagesCollection.push($(this).children("img"));
-          }
-        });
-      } else {
-        $(".item-column").each(function() {
-          if (
-            $(this)
-              .children("img")
-              .data("gallery-tag") === activeTag
-          ) {
-            imagesCollection.push($(this).children("img"));
-          }
-        });
-      }
-      let index = 0,
-        next = null;
-
-      $(imagesCollection).each(function(i) {
-        if ($(activeImage).attr("src") === $(this).attr("src")) {
-          index = i;
-        }
-      });
-      next = imagesCollection[index] || imagesCollection[0];
-      $(".lightboxImage").attr("src", $(next).attr("src"));
+      return imagesCollection;
     },
     createLightBox(gallery, lightboxId, navigation) {
       gallery.append(`<div class="modal fade" id="${
         lightboxId ? lightboxId : "galleryLightbox"
       }" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog" role="document">
+                <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-body">
                             ${
@@ -210,7 +198,7 @@
                             <img class="lightboxImage img-fluid" alt="Contenu de l'image affichée dans la modale au clique"/>
                             ${
                               navigation
-                                ? '<div class="mg-next" style="cursor:pointer;position:absolute;top:50%;right:-15px;background:white;}">></div>'
+                                ? '<div class="mg-next" style="cursor:pointer;position:absolute;top:50%;right:-15px;background:white;">></div>'
                                 : '<span style="display:none;" />'
                             }
                         </div>
@@ -240,7 +228,7 @@
         return;
       }
       $(".active-tag").removeClass("active active-tag");
-      $(this).addClass("active-tag");
+      $(this).addClass("active active-tag");
 
       var tag = $(this).data("images-toggle");
 
