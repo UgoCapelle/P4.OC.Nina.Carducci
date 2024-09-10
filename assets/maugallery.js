@@ -114,18 +114,21 @@
       }
     },
     openLightBox(element, lightboxId) {
+      // Sélection de l'élément lightbox
       const lightboxEl = document.getElementById(lightboxId);
       if (lightboxEl) {
         const lightboxImage = lightboxEl.querySelector('.lightboxImage');
         if (lightboxImage) {
+          // Mise à jour de la source de l'image dans la lightbox
           lightboxImage.src = element.attr('src');
-          // Store the current image element for navigation
+          // Stockage de l'image pour la navigation
           lightboxEl.currentImage = element;
         }
+        // Affichage de la lightbox avec Bootstrap
         const modal = new bootstrap.Modal(lightboxEl);
         modal.show();
         
-        // Center the modal
+        // Centrer la modale
         lightboxEl.style.display = 'flex';
         lightboxEl.style.alignItems = 'center';
         lightboxEl.style.justifyContent = 'center';
@@ -138,10 +141,12 @@
       const lightboxEl = document.getElementById(lightboxId);
       const lightboxImage = lightboxEl.querySelector('.lightboxImage');
       const currentImage = lightboxEl.currentImage;
-      
+
+      // Récupération de l'étiquette active
       let activeTag = $(".tags-bar span.active-tag").data("images-toggle");
       let imagesCollection = this.getImagesCollection(activeTag);
       
+      // Recherche de l'image précédente
       let currentIndex = imagesCollection.findIndex(img => img.attr('src') === currentImage.attr('src'));
       let prevIndex = (currentIndex - 1 + imagesCollection.length) % imagesCollection.length;
       
@@ -155,9 +160,11 @@
       const lightboxImage = lightboxEl.querySelector('.lightboxImage');
       const currentImage = lightboxEl.currentImage;
       
+      // Récupération de l'étiquette active
       let activeTag = $(".tags-bar span.active-tag").data("images-toggle");
       let imagesCollection = this.getImagesCollection(activeTag);
       
+      // Recherche de l'image suivante
       let currentIndex = imagesCollection.findIndex(img => img.attr('src') === currentImage.attr('src'));
       let nextIndex = (currentIndex + 1) % imagesCollection.length;
       
@@ -168,6 +175,7 @@
 
     getImagesCollection(activeTag) {
       let imagesCollection = [];
+      // Récupérer toutes les images si le tag actif est "all"
       if (activeTag === "all") {
         $(".item-column").each(function() {
           if ($(this).children("img").length) {
@@ -175,6 +183,7 @@
           }
         });
       } else {
+        // Récupérer les images en fonction du tag actif
         $(".item-column").each(function() {
           if ($(this).children("img").data("gallery-tag") === activeTag) {
             imagesCollection.push($(this).children("img"));
@@ -228,7 +237,7 @@
         return;
       }
       $(".active-tag").removeClass("active active-tag");
-      $(this).addClass("active active-tag");
+      $(this).addClass("active active-tag"); // ajout de *active* active-tag pour que la class s'applique correctement
 
       var tag = $(this).data("images-toggle");
 
